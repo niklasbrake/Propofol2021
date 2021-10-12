@@ -34,7 +34,6 @@ pI = gamma_I/gam(tauI1,tauI2)*[(2*pi*sqrt(-1)*f+1/tauI1).^(-1) - (2*pi*sqrt(-1)*
 pE = gamma_E/gam(tauE1,tauE2)*[(2*pi*sqrt(-1)*f+1/tauE1).^(-1) - (2*pi*sqrt(-1)*f+1/tauE2).^(-1)];
 
 
-
 pwE = LE.*abs(pE).^2;
 pwI = LI.*abs(pI).^2;
 pwA = LAP.*abs(pAP).^2;
@@ -67,19 +66,18 @@ ax = subplot(1,2,1);
 	box on; set(gca,'tickdir','in');
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+gi = @(k,a1,a2) 1e3/(a1-a2)*((1e3/a1+sqrt(-1)*2*pi*k).^(-1)-(1e3/a2+sqrt(-1)*2*pi*k).^(-1));
+lgNorm = @(k,m1,s1) exp(m1-s1^2/2)*exp(-(log(k)-m1).^2/(2*s1^2))./k;
+gausses = @(m1,s1,b1,m2,s2,b2,m4,s4,b4,k) b1*lgNorm(k,m1,s1)+b2*lgNorm(k,m2,s2)+b4*lgNorm(k,m4,s4);
+gz = @(k,a1,n) 1./(1+2*pi*sqrt(-1)*(k/a1).^n);
+ftfun = @(m1,s1,m2,s2,m4,s4,b1,b2,b4,Z1,gamI,tauI,tauI2,wf,theta,f) 2* log(abs(gz(f,wf,theta))) +  ...
+	log( Z1 + gamI*(1+gamI/2*gausses(m1,s1,b1,m2,s2,b2,m4,s4,b4,f)).* abs(gi(f,tauI,tauI2)).^2);
+F = @(x,f) ftfun(x(1),x(2),x(3),x(4),x(5),x(6),x(7),x(8),x(9),x(10),x(11),x(12),x(13),x(14),x(15),f);
+FBL = @(x,f) ftfun(x(1),x(2),x(3),x(4),x(5),x(6),0,0,0,x(10),x(11),x(12),x(13),x(14),x(15),f);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 load('PrePostGAFit.mat')
-load('timeInformation.mat','timeInfo');
-infusionTime = timeInfo.infusion_onset-timeInfo.object_drop;
-
-load('psd_channel_Cz.mat','freq','time','psd');
-for i = 1:13
-	preX(:,i) = nanmedian(psd(:,time<infusionTime(i),i),2);
-	postX(:,i) = nanmedian(psd(:,and(time>0,time<60),i),2);
-end
-
-[F,FBL] = fittingmodel2;
-
-
 pts = 12;
 c = pre(:,pts);
 c(14) = Inf;
@@ -87,8 +85,7 @@ cBL = c; cBL(7:9) = 0;
 c1 = cBL; c1(10) = 0;
 c2 = cBL; c2(11) = 0;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+load('spectra_pre_post.mat');
 ax = subplot(1,2,2);
 	plot(freq,preX(:,pts),'k','LineWidth',1); hold on;
 	plot(freq,exp(FBL(c,freq)),'r'); 

@@ -84,9 +84,6 @@ fig.Position(3:4) = [8.7,7];
 	plotwitherror(F,PE,'CI');
 	plotwitherror(F,PI,'CI');
 	plotwitherror(F,PL,'CI');
-	plot(F,abs(A).^2+abs(B).^2,'-k','LineWidth',1);
-	plot(F,abs(A).^2,'-k','LineWidth',1);
-	plot(F,abs(B).^2,'-k','LineWidth',1);
 	set(gca,'yscale','log')
 	set(gca,'xscale','log')
 	xlim([1,150]);

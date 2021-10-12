@@ -1,4 +1,4 @@
-function plotfigure2
+% function plotfigure2
 
 myPath = fileparts(mfilename('fullpath'));
 addpath(myPath,'functions');
@@ -8,10 +8,15 @@ addpath(myPath,'data');
 load('timeInformation.mat','timeInfo');
 infusionTime = timeInfo.infusion_onset-timeInfo.object_drop;
 
-load('psd_channel_Cz.mat','freq','time','psd');
-logPSD = log(psd);
-
-fMax = 55;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% For access to spectrogram and time-domain data, 
+% please contact Gilles Plourde at gilles.plourde@mcgill.ca
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	% load('psd_channel_Cz.mat','freq','time','psd');
+	freq = 0.5:0.5:200;
+	psd = nan*zeros(400,7491,14);
+	time = linspace(-525.0010,228.3877,7491);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 m=10; N = size(psd,2)-m;
 X = zeros(size(psd,1),N,size(psd,3));
@@ -21,26 +26,28 @@ for i = 1:N
 	X(:,i,:) = nanmean(psd(:,it(:,i),:),2);
 end
 fitTime = interp1(1:length(time),time,mean(it));
-% OOF = nan*zeros(size(X,2),2,size(X,3));
-% for j = 1:13
-	% goodIdcs = find(any(~isnan(X(:,:,j)))); % Times that were not NaNs 
-	% [OOF(goodIdcs,:,j),fun] = getFOOOF(freq(freq<fMax),X(freq<fMax,goodIdcs,j),false);
-% end
-load('fooof_params_Cz_overtime.mat');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Load pre-saved results
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	fMax = 55;
+	% OOF = nan*zeros(size(X,2),2,size(X,3));
+	% for j = 1:13
+		% goodIdcs = find(any(~isnan(X(:,:,j)))); % Times that were not NaNs 
+		% [OOF(goodIdcs,:,j),fun] = getFOOOF(freq(freq<fMax),X(freq<fMax,goodIdcs,j),false);
+	% end
+	load('fooof_params_Cz_overtime.mat');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 for i = 1:size(OOF,3)
 	for j = 1:size(OOF,1)
 		oof(:,j,i) = fun(freq(freq<fMax),OOF(j,:,i));
 	end
 end
-
 detrendedX = 10*log(X(freq<fMax,:,:)./oof)/log(10);
 
 
-for i = 1:13
-	preX(:,i) = nanmedian(psd(:,time<infusionTime(i),i),2);
-	postX(:,i) = nanmedian(psd(:,and(time>0,time<60),i),2);
-end
+load('spectra_pre_post.mat');
 [oofPre,funPre,rsquaredPre] = getFOOOF(freq(freq<=fMax),preX(freq<=fMax,:),false);
 [oofPost,funPost,rsquaredPost] = getFOOOF(freq(freq<=fMax),postX(freq<=fMax,:),false);
 dRange = [1,4];
@@ -58,8 +65,7 @@ fig = figure('color','w','units','centimeters');
 fig.Position(3) = 18.3;
 fig.Position(4) = 8.9;
 axes('Position',[0.06,0.6,0.19,0.33]);
-% subplot(2,4,1);
-	imagesc(time(:),freq,nanmean(logPSD(:,:,:),3));
+	imagesc(time(:),freq,log(nanmean(psd,3)));
 	ylim([0.5,40]);
 	axis xy;
 	set(gca,'clim',[-4,7])
@@ -72,7 +78,6 @@ axes('Position',[0.06,0.6,0.19,0.33]);
 
 	set(gca,'FontSize',7);
 axes('Position',[0.315,0.6,0.19,0.33]);
-% subplot(2,4,2);
 	imagesc(fitTime,freq(freq<fMax),log(nanmedian(oof,3)));
 	ylim([0.5,40])
 	% set(gca,'CLim',[-5,1])
@@ -86,7 +91,6 @@ axes('Position',[0.315,0.6,0.19,0.33]);
 	axis xy;
 
 axes('Position',[0.57,0.6,0.19,0.33]);
-% subplot(2,4,3);
 	imagesc(fitTime,freq(freq<fMax),nanmedian(detrendedX,3));
 	set(gca,'CLim',[3,12]);
 	ylim([0.5,40]);
@@ -118,9 +122,10 @@ T = example.time(idcs2);
 X = example.timedomain(idcs2);
 
 fMax = 55;
-psd1 = nanmean(psd(:,idcs,1),2);
-[OOF,oofF,pks] = getFOOOF(freq(and(freq>0.5,freq<fMax)), ...
-	psd1(and(freq>0.5,freq<fMax)),false);
+[~,~,psd1] = eegfft(T,X,2,1.9);
+psd1 = nanmedian(psd1,2);
+[OOF,oofF,pks] = getFOOOF(freq(freq<fMax), ...
+	psd1(freq<fMax),false);
 
 axes('Position',[0.06,0.12,0.15,0.33]);
 	plot(freq,log(psd1)/log(10),'k','LineWidth',1);

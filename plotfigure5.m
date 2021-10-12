@@ -1,4 +1,4 @@
-% function plotfigure5
+function plotfigure5
 
 myPath = fileparts(mfilename('fullpath'));
 addpath(fullfile(myPath,'functions'));
@@ -10,23 +10,35 @@ fitTime = time;
 load('timeInformation.mat','timeInfo');
 infusionTime = timeInfo.infusion_onset-timeInfo.object_drop;
 
-load('psd_channel_Cz.mat','time','freq','psd')
 
-for pts = 1:13;
-	idcs = [];
-	for i = 1:floor(max(freq)/60)
-		idcs = [idcs,find(and(freq>60*i-5,freq<60*i+5))];
-	end
-	idcs = setdiff(1:length(freq),idcs);
-	for i = 1:size(psd,2)
-		psd(:,i,pts) = interp1(freq(idcs),psd(idcs,i,pts),freq,'linear');
-	end
-	logPSD(:,:,pts) = log(psd(freq<=200,:,pts));
-	% params(11,:,pts) = params(11,:,pts).*(params(12,:,pts)-params(13,:,pts))/1e3;
-end
-freq(freq>200) = [];
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% For access to spectrogram and time-domain data, 
+% please contact Gilles Plourde at gilles.plourde@mcgill.ca
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	% load('psd_channel_Cz.mat','time','freq','psd')
+	% for pts = 1:13;
+	% 	idcs = [];
+	% 	for i = 1:floor(max(freq)/60)
+	% 		idcs = [idcs,find(and(freq>60*i-5,freq<60*i+5))];
+	% 	end
+	% 	idcs = setdiff(1:length(freq),idcs);
+	% 	for i = 1:size(psd,2)
+	% 		psd(:,i,pts) = interp1(freq(idcs),psd(idcs,i,pts),freq,'linear');
+	% 	end
+	% 	logPSD(:,:,pts) = log(psd(freq<=200,:,pts));
+	% end
+	freq = 0.5:0.5:200;
+	logPSD = nan*zeros(400,302,13);
+	time = linspace(-525.0010,228.3877,302);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[F,FBL] = fittingmodel;
+gi = @(k,a1,a2) (1e3/a1+sqrt(-1)*2*pi*k).^(-1)-(1e3/a2+sqrt(-1)*2*pi*k).^(-1);
+gz = @(k,a1,n) 1./(1+2*pi*sqrt(-1)*(k/a1).^n);
+ftgauss1 = @(k,m1,s1) exp(-(k-m1).^2/(2*s1^2));
+ftgauss2 = @(k,m1,s1) exp(m1-s1^2/2)*exp(-(log(k)-m1).^2/(2*s1^2))./k;
+gausses = @(m1,s1,b1,m2,s2,b2,m4,s4,b4,k) b1*ftgauss2(k,m1,s1)+b2*ftgauss2(k,m2,s2)+b4*ftgauss2(k,m4,s4);
+ftfun = @(m1,s1,m2,s2,m4,s4,b1,b2,b4,Z1,gamI,tauI,tauI2,w,n,f) 2*log(abs(Z1*gz(f,w,n)+gamI*(1+gausses(m1,s1,b1,m2,s2,b2,m4,s4,b4,f)).*gi(f,tauI,tauI2)));
+F = @(x,f) ftfun(x(1),x(2),x(3),x(4),x(5),x(6),x(7),x(8),x(9),x(10),x(11),x(12),x(13),x(14),x(15),f);
 
 for k = 1:size(params,1)
 	for pts = 1:13
@@ -40,11 +52,9 @@ for i = 1:15
 	params(i,:,1) = fillmissing(params(i,:,1),'linear');
 end
 
-[F,FBL] = fittingmodel;
-
 M=1; % Sample patient
 for pts = 1:13
-	for i = 1:size(psd,2)
+	for i = 1:size(logPSD,2)
 		parBestBL = params(:,i,pts);
 		parBestBL(7:9) = 0;
 		blPW(:,i,pts) = F(parBestBL,freq);
@@ -167,7 +177,7 @@ axes('Position',[0.15 0.81 0.14 0.14]);
 	gcaformat;
 	title('Pt. #1 spectrogram')
 axes('Position',[0.35 0.81 0.14 0.14]);
-	% imagesc(time,freq,P1FT)
+	imagesc(time,freq,P1FT)
 	ylabel('Frequency (Hz)');
 	xlabel('Drop-aligned time (s)');
 	xlim([-360,60])

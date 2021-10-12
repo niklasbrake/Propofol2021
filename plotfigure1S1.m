@@ -7,6 +7,16 @@ LUT = [{'Fz'}, {'Pz'}, {'C3'}, {'C4'}, {'CP3'}, {'CP4'}];
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% For access to time-domain data, please contact 
+% Gilles Plourde at gilles.plourde@mcgill.ca
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% load('FlaviePtsDropAlignedTimeDomain20191012.mat');
+error('For access to time-domain data, please contact Gilles Plourde at gilles.plourde@mcgill.ca');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%% \begin{Baseline-normalized analysis} %%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 load(fullfile(dataPath,'timeInformation.mat'),'timeInfo');

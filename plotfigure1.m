@@ -35,16 +35,21 @@ axes('Position',[0.076,0.74,0.85,0.22]);
 load('timeInformation.mat','timeInfo');
 infusionTime = timeInfo.infusion_onset-timeInfo.object_drop;
 
-% Compute spectrogram
-%{
-% load('FlaviePtsDropAlignedTimeDomain20191012.mat');
-for i = 1:14
-	[freq,time,psd(:,:,i)] = eegfft(Time,squeeze(TimeDomainAligned(:,2,i)),2,1.9);
-end
-%}
-% Load presaved results
-% load('PSD_2s_1.9overlap.mat),'freq','time','psd');
-load(fullfile('psd_channel_Cz.mat'),'freq','time','psd');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% For access to time-domain data, please contact 
+% Gilles Plourde at gilles.plourde@mcgill.ca
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	% Compute spectrogram
+	%{
+	% load('FlaviePtsDropAlignedTimeDomain20191012.mat');
+	for i = 1:14
+		[freq,time,psd(:,:,i)] = eegfft(Time,squeeze(TimeDomainAligned(:,2,i)),2,1.9);
+	end
+	%}
+	freq = 0.5:0.5:200;
+	psd = nan*zeros(400,7491,14);
+	time = linspace(-525.0010,228.3877,7491);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Compute baseline spectrum
 for i = 1:14
@@ -109,38 +114,37 @@ axes('Position',[0.6,0.44,0.36,0.28]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%% \end{Baseline-normalized analysis} %%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 fMax = 55;
-
-for i = 1:13
-preX(:,i) = nanmedian(psd(:,time<infusionTime(i),i),2);
-postX(:,i) = nanmedian(psd(:,and(time>0,time<60),i),2);
-end
-
+load('spectra_pre_post.mat');
 [oofPre,funPre,rsquaredPre] = getFOOOF(freq(freq<=fMax),preX(freq<=fMax,:),false);
 [oofPost,funPost,rsquaredPost] = getFOOOF(freq(freq<=fMax),postX(freq<=fMax,:),false);
 
-% Compute 1/f over time
-%{
-m=20; N = floor((size(psd,2)-m/2)/m);
-X = zeros(size(psd,1),N,size(psd,3));
-it = zeros(m,N);
-for i = 1:N
-it(:,i) = [i*m-m/2+1:i*m+m/2];
-X(:,i,:) = nanmean(psd(:,it,:),2);
-end
-fitTime = interp1(1:length(time),time,mean(it));
-for j = 1:13
-goodIdcs = find(any(~isnan(X(:,:,j)))); % Times that were not NaNs 
-temp = getFOOOF(freq(freq<fMax),X(freq<fMax,goodIdcs,j),false);
-alpha(goodIdcs,j) = temp(:,2);
-end
-%}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Load presaved results
-load('fooof_params_Cz_overtime.mat');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	% Compute 1/f over time
+	%{
+	m=20; N = floor((size(psd,2)-m/2)/m);
+	X = zeros(size(psd,1),N,size(psd,3));
+	it = zeros(m,N);
+	for i = 1:N
+	it(:,i) = [i*m-m/2+1:i*m+m/2];
+	X(:,i,:) = nanmean(psd(:,it,:),2);
+	end
+	fitTime = interp1(1:length(time),time,mean(it));
+	for j = 1:13
+	goodIdcs = find(any(~isnan(X(:,:,j)))); % Times that were not NaNs 
+	temp = getFOOOF(freq(freq<fMax),X(freq<fMax,goodIdcs,j),false);
+	alpha(goodIdcs,j) = temp(:,2);
+	end
+	%}
+	load('fooof_params_Cz_overtime.mat');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 alpha = [];
 for i = 1:14
-alpha(:,i) = OOF(:,2,i);
+	alpha(:,i) = OOF(:,2,i);
 end
 
 idcs = [];
