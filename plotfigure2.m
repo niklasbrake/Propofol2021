@@ -116,7 +116,7 @@ axes('Position',[0.82,0.6,0.15,0.33]);
 colormap jet
 
 example = load('sampleTimeSeries1.mat');
-idcs = find(and(time>35,time<60));
+idcs = find(and(example.time>35,example.time<60));
 idcs2 = find(and(example.time>35,example.time<60));
 T = example.time(idcs2);
 X = example.timedomain(idcs2);

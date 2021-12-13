@@ -1,15 +1,19 @@
-function plotfigure3
+function [predictedPSD,f] = plotfigure3
 
 myPath = fileparts(mfilename('fullpath'));
 addpath(myPath,'functions');
 addpath(myPath,'data');
 
-load('ModelParameters.mat');
+load('C:\Users\brake\Documents\GitHub\Propofol2021-private\data\ModelParameters.mat');
 
+% lambda_AP = lambda_AP*0.3;
+% lambda_E = lambda_E*0.3;
+% tauI2 = 60e-3;
+% gamma_I = gamma_I*2;
 
-LE = (a_0^2+a_t^2)^2*rho_N*N_E*lambda_E/(2*pi*96*pi*R_a^2*sig^2*r_0^2);
-LI = (a_0^2+a_t^2)^2*rho_N*N_I*lambda_I/(2*pi*96*pi*R_a^2*sig^2*r_0^2);
-LAP = d_AP^4*rho_N*rho_AP*lambda_AP/(2*pi*768*pi*R_a^2*sig^2*r_0^2);
+LE = 0.05*(a_0^2+a_t^2)^2*rho_N*N_E*lambda_E/(2*pi*96*pi*R_a^2*sig^2*r_0^2);
+LI = 0.05*(a_0^2+a_t^2)^2*rho_N*N_I*lambda_I/(2*pi*96*pi*R_a^2*sig^2*r_0^2);
+LAP = d_AP^4*3e8*lambda_AP/(2*pi*768*pi*R_a^2*sig^2*r_0^2);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 gam = @(t1,t2) (1-t1/t2)*(t1/t2)^(-t1/(t1-t2));
@@ -44,7 +48,8 @@ ax = subplot(1,2,1);
 	h(1)=plot(f,pwE,'-r','LineWidth',1); hold on;
 	h(2)=plot(f,pwI,'-b','LineWidth',1);
 	h(3)=plot(f,pwA,'-g','LineWidth',1);
-	plot(f,pwE+pwI+pwA,'k','LineWidth',1.5); 
+	predictedPSD = pwE+pwI+pwA;
+	plot(f,predictedPSD,'k','LineWidth',1.5); 
 	set(gca,'yscale','log')
 	set(gca,'xscale','log')
 	xlim([0.5,400]);

@@ -1,4 +1,4 @@
-function plotfigure5
+% function plotfigure5
 
 myPath = fileparts(mfilename('fullpath'));
 addpath(fullfile(myPath,'functions'));
@@ -15,21 +15,21 @@ infusionTime = timeInfo.infusion_onset-timeInfo.object_drop;
 % For access to spectrogram and time-domain data, 
 % please contact Gilles Plourde at gilles.plourde@mcgill.ca
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	% load('psd_channel_Cz.mat','time','freq','psd')
-	% for pts = 1:13;
-	% 	idcs = [];
-	% 	for i = 1:floor(max(freq)/60)
-	% 		idcs = [idcs,find(and(freq>60*i-5,freq<60*i+5))];
-	% 	end
-	% 	idcs = setdiff(1:length(freq),idcs);
-	% 	for i = 1:size(psd,2)
-	% 		psd(:,i,pts) = interp1(freq(idcs),psd(idcs,i,pts),freq,'linear');
-	% 	end
-	% 	logPSD(:,:,pts) = log(psd(freq<=200,:,pts));
-	% end
+	% logPSD = nan*zeros(400,302,13);
+	% time = linspace(-525.0010,228.3877,302);
+	load('psd_channel_Cz.mat','time','freq','psd')
+	for pts = 1:13;
+		idcs = [];
+		for i = 1:floor(max(freq)/60)
+			idcs = [idcs,find(and(freq>60*i-5,freq<60*i+5))];
+		end
+		idcs = setdiff(1:length(freq),idcs);
+		for i = 1:size(psd,2)
+			psd(:,i,pts) = interp1(freq(idcs),psd(idcs,i,pts),freq,'linear');
+		end
+		logPSD(:,:,pts) = log(psd(freq<=200,:,pts));
+	end
 	freq = 0.5:0.5:200;
-	logPSD = nan*zeros(400,302,13);
-	time = linspace(-525.0010,228.3877,302);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 gi = @(k,a1,a2) (1e3/a1+sqrt(-1)*2*pi*k).^(-1)-(1e3/a2+sqrt(-1)*2*pi*k).^(-1);

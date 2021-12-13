@@ -1,4 +1,4 @@
-function plotfigure3S1
+% function plotfigure3S1
 
 myPath = fileparts(mfilename('fullpath'));
 dataPath = fullfile(myPath,'data');	
@@ -20,7 +20,7 @@ pAP = 2*Y(2:ceil(L/2)+1);
 f = linspace(0,1/2,ceil(L/2)+1)/dt; f = f(2:end);
 
 dx = 1e-3;
-dt = 1e-4;
+dt = 1e-3;
 x = -0.2:dx:0.2;
 t = 0:dt:4;
 
@@ -69,3 +69,9 @@ subplot(2,2,4);
 	xlim([1,1e3]);
 	set(gca,'xscale','log');
 	ylabel('log power')
+
+
+	X = V(:,1.5e3);
+
+	X1d1 = diff(X);
+	% X2d2=X(3:end)+X(1:end-2)-X(2:end-1)*2;
